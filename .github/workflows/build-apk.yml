@@ -20,9 +20,12 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Accept Android SDK Licenses
+      - name: Prepare Web Assets
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          mkdir -p www
+          cp index.html www/
+          [ -f vaultify.png ] && cp vaultify.png www/ || true
+          [ -f manifest.json ] && cp manifest.json www/ || true
 
       - name: Install Dependencies
         run: npm install
