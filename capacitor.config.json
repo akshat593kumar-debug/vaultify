@@ -1,0 +1,9 @@
+{
+  "appId": "com.vaultify.music",
+  "appName": "Vaultify",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "short_name": "Vaultify",
+  "name": "Vaultify Music Engine",
+  "icons": [
+    { "src": "vaultify.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "vaultify.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#030305",
+  "theme_color": "#030305",
+  "display": "standalone",
+  "orientation": "portrait"
+}

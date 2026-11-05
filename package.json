@@ -1,0 +1,13 @@
+{
+  "name": "vaultify-music",
+  "version": "3.1.0",
+  "description": "Vaultify Pro Audio Engine - Android 17+ Shade Player",
+  "main": "index.html",
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

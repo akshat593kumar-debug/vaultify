@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VaultDeals</title>
+    <script>
+      window.addEventListener('error', function(e) {
+        var box = document.getElementById('debug-box');
+        if (!box) {
+          box = document.createElement('div');
+          box.id = 'debug-box';
+          box.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#111;color:#ff4444;padding:20px;z-index:999999;font-family:monospace;white-space:pre-wrap;overflow:auto;font-size:13px;';
+          document.body ? document.body.appendChild(box) : document.documentElement.appendChild(box);
+        }
+        box.innerHTML += '<b>[JS Error]</b> ' + e.message + '\n<b>File:</b> ' + e.filename + ':' + e.lineno + '\n\n';
+      });
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" crossorigin src="/assets/index-Dq88JeWF.js"></script>
+  </head>
+  <body class="bg-black text-[#E1DCC9] m-0 p-0 antialiased">
+    <div id="root"></div>
+  </body>
+</html>
