@@ -24,21 +24,31 @@ jobs:
         run: |
           mkdir -p www
           mkdir -p assets
+          
+          # Agar vaultify.png repo me nahi hai, toh Python se 1024x1024 base PNG auto-generate karo
+          python3 -c "
+          import struct, zlib
+          def make_png(w, h, r, g, b):
+              raw = b''.join(b'\\x00' + bytes([r, g, b] * w) for _ in range(h))
+              def chunk(tag, data):
+                  return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data))
+              return b'\\x89PNG\\r\\n\\x1a\\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
+          
+          import os
+          if not os.path.exists('vaultify.png'):
+              with open('vaultify.png', 'wb') as f:
+                  f.write(make_png(1024, 1024, 147, 51, 234))
+          "
+          
           cp index.html www/
-          
-          # If vaultify.png not found, create a placeholder high-res icon
-          if [ ! -f vaultify.png ]; then
-            convert -size 1024x1024 xc:#581c87 -fill white -gravity center -pointsize 140 -annotate 0 "VAULTIFY" vaultify.png || true
-          fi
-          
           cp vaultify.png www/
           [ -f manifest.json ] && cp manifest.json www/ || true
           
-          # Capacitor icon & splash source
-          cp vaultify.png assets/icon-only.png || true
-          cp vaultify.png assets/icon-foreground.png || true
-          cp vaultify.png assets/icon-background.png || true
-          cp vaultify.png assets/splash.png || true
+          # Icon generation sources
+          cp vaultify.png assets/icon-only.png
+          cp vaultify.png assets/icon-foreground.png
+          cp vaultify.png assets/icon-background.png
+          cp vaultify.png assets/splash.png
 
       - name: Install Dependencies
         run: npm install
@@ -46,7 +56,7 @@ jobs:
       - name: Initialize Android Project
         run: |
           npx cap add android
-          
+
       - name: Generate App Launcher Icons & Splash Screens
         run: |
           npx @capacitor/assets generate --android || true
@@ -55,11 +65,9 @@ jobs:
         run: |
           npx cap sync android
 
-      - name: Add Permissions & Dark Theme in AndroidManifest
+      - name: Add Permissions & Dark Theme
         run: |
           sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.WAKE_LOCK" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />\n<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' android/app/src/main/AndroidManifest.xml
-          # Fix blank screen background
-          sed -i 's/android:theme="@style\/AppTheme"/android:theme="@style\/AppTheme.NoActionBar" android:windowBackground="@android:color\/black"/' android/app/src/main/AndroidManifest.xml || true
 
       - name: Build Debug APK
         run: |
