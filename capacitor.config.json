@@ -2,7 +2,18 @@
   "appId": "com.vaultify.music",
   "appName": "Vaultify",
   "webDir": "www",
+  "backgroundColor": "#030305",
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "backgroundColor": "#030305",
+    "webContentsDebuggingEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#030305",
+      "showSpinner": false
+    }
   }
 }

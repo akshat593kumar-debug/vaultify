@@ -20,24 +20,46 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Prepare Web Assets
+      - name: Prepare Assets Directory
         run: |
           mkdir -p www
+          mkdir -p assets
           cp index.html www/
-          [ -f vaultify.png ] && cp vaultify.png www/ || true
+          
+          # If vaultify.png not found, create a placeholder high-res icon
+          if [ ! -f vaultify.png ]; then
+            convert -size 1024x1024 xc:#581c87 -fill white -gravity center -pointsize 140 -annotate 0 "VAULTIFY" vaultify.png || true
+          fi
+          
+          cp vaultify.png www/
           [ -f manifest.json ] && cp manifest.json www/ || true
+          
+          # Capacitor icon & splash source
+          cp vaultify.png assets/icon-only.png || true
+          cp vaultify.png assets/icon-foreground.png || true
+          cp vaultify.png assets/icon-background.png || true
+          cp vaultify.png assets/splash.png || true
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Setup Android Project
+      - name: Initialize Android Project
         run: |
           npx cap add android
+          
+      - name: Generate App Launcher Icons & Splash Screens
+        run: |
+          npx @capacitor/assets generate --android || true
+
+      - name: Sync Capacitor
+        run: |
           npx cap sync android
 
-      - name: Add Permissions
+      - name: Add Permissions & Dark Theme in AndroidManifest
         run: |
           sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.WAKE_LOCK" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />\n<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' android/app/src/main/AndroidManifest.xml
+          # Fix blank screen background
+          sed -i 's/android:theme="@style\/AppTheme"/android:theme="@style\/AppTheme.NoActionBar" android:windowBackground="@android:color\/black"/' android/app/src/main/AndroidManifest.xml || true
 
       - name: Build Debug APK
         run: |
