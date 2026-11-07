@@ -1,81 +1,20 @@
-name: Build Vaultify APK
-
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
+name: Build APK
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
+        with: { node-version: 22 }
       - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Prepare Assets Directory
-        run: |
-          mkdir -p www
-          mkdir -p assets
-          
-          # Agar vaultify.png repo me nahi hai, toh Python se 1024x1024 base PNG auto-generate karo
-          python3 -c "
-          import struct, zlib
-          def make_png(w, h, r, g, b):
-              raw = b''.join(b'\\x00' + bytes([r, g, b] * w) for _ in range(h))
-              def chunk(tag, data):
-                  return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data))
-              return b'\\x89PNG\\r\\n\\x1a\\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
-          
-          import os
-          if not os.path.exists('vaultify.png'):
-              with open('vaultify.png', 'wb') as f:
-                  f.write(make_png(1024, 1024, 147, 51, 234))
-          "
-          
-          cp index.html www/
-          cp vaultify.png www/
-          [ -f manifest.json ] && cp manifest.json www/ || true
-          
-          # Icon generation sources
-          cp vaultify.png assets/icon-only.png
-          cp vaultify.png assets/icon-foreground.png
-          cp vaultify.png assets/icon-background.png
-          cp vaultify.png assets/splash.png
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Initialize Android Project
-        run: |
-          npx cap add android
-
-      - name: Generate App Launcher Icons & Splash Screens
-        run: |
-          npx @capacitor/assets generate --android || true
-
-      - name: Sync Capacitor
-        run: |
-          npx cap sync android
-
-      - name: Add Permissions & Dark Theme
-        run: |
-          sed -i '/<application/i <uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.WAKE_LOCK" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />\n<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' android/app/src/main/AndroidManifest.xml
-
-      - name: Build Debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
+        with: { distribution: 'temurin', java-version: '17' }
+      - run: npm install
+      - run: npx cap sync android
+      - run: chmod +x android/gradlew
+      - working-directory: ./android
+        run: ./gradlew assembleDebug --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: Vaultify-Android-APK
+          name: Vaultify-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
